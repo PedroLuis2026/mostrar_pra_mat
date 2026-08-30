@@ -28,7 +28,7 @@ class Banco:
     def abrir_conta(self):
         while True:
             cpf = input("\nDigite o seu cpf(apenas números): ").strip()
-            if not cpf:
+            if not cpf.isdecimal() or not cpf or len(cpf) > 11 or len(cpf) < 11:
                 print("\nDigite algo válido")
                 continue
             break
@@ -55,18 +55,6 @@ class Banco:
             conta = ContaCorrente(agencia=agencia, numero=numeros, cliente=cliente_encontrado)
         self.__lista_contas.append(conta)
         print(f"\nA {tipo_conta} de número {conta.numero_conta} foi criada com sucesso!")
-    def solicitacao(self):
-        while True:
-            cpf = input("\nDigite o seu cpf(apenas números): ").strip()
-            if not cpf:
-                print("\nDigite algo válido")
-                continue
-            break
-        for conta in self.__lista_contas:
-            if cpf == conta.cliente.cpf:
-                cliente = conta.cliente
-                return cliente.solicitar_transacao(conta)
-        print("\nCPF inválido ou conta não encontrada")
 
     def listar_contas(self):
            print("=" * 40)
@@ -95,7 +83,7 @@ class Cliente:
             break
         return tipo_conta
 
-    def solicitar_tansacao(self, conta):
+    def solicitar_transacao(self, conta):
         while True:
             escolha = input("\nQue tipo de transação você quer fazer? [sacar] [depositar]").strip().lower()
             if not escolha or escolha not in ["sacar", "depositar"]:
@@ -157,30 +145,35 @@ class Conta:
                 continue
             break
         if escolha == "extrato_geral":
-            if len(self.historico.transacoes) == 0:
-                print("\nNenhuma transação feita ainda.")
             print("\n" + "=" * 40)
             print("TRANSAÇÕES".center(40))
             print("=" * 40)
+            if len(self.historico.transacoes) == 0:
+                print("\nNenhuma transação feita ainda.")
+                return
             for transacao in self.historico.transacoes:
                 for k, v in transacao.items():
                     print(f"\n{k}:\t{v}")
                 print("\n" + "=" * 40)
-                print(f"R${self.saldo}".replace(".", ","))
+                print(f"Valor total da conta:\tR${self.saldo}".replace(".", ","))
                 print("=" * 40)
+                return
+
         if escolha == "extrato_do_dia":
-            if len(self.historico.transacoes) == 0:
-                print("\nNenhuma transação feita ainda.")
             transacao_dia = self.historico.transacoes_hoje()
             print("\n" + "=" * 40)
             print("TRANSAÇÕES DO DIA".center(40))
             print("=" * 40)
+            if len(self.historico.transacoes) == 0:
+                print("\nNenhuma transação feita ainda.")
+                return
             for transacao in transacao_dia:
                 for k, v in transacao.items():
                     print(f"\n{k}:\t{v}")
                 print("\n" + "=" * 40)
-                print(f"R${self.saldo}".replace(".", ","))
+                print(f"Valor total da conta:\tR${self.saldo}".replace(".", ","))
                 print("=" * 40)
+                return
         else:
             print("\nErro")
             return
@@ -204,7 +197,7 @@ class ContaCorrente(Conta):
     def processar_transacao(self, transacao):
         if len(self.historico.transacoes) > 0:
             data_hoje = datetime.now().date()
-            data_ultima_transacao = datetime.strptime(self.historico.transacoes[-1]['data'], "%Y/%m/%d")
+            data_ultima_transacao = datetime.strptime(self.historico.transacoes[-1]['data'], "%Y/%m/%d %H:%M:%S").date()
             if data_hoje != data_ultima_transacao:
                 self.__limite_diario = 10
         transacao.registrar(self)
@@ -222,6 +215,7 @@ class Deposito(Transacao):
     def registrar(self, conta):
         conta.saldo += self.valor
         conta.historico.adicionar_transacao(self)
+        print(f"Deposito de R${self.valor}".replace(".", ","))
 
 class Saque(Transacao):
     def __init__(self, valor):
@@ -263,7 +257,7 @@ class Historico:
         transacoes_dia = []
         data_hoje = datetime.now().date()
         for transacao in self.__transacoes:
-            transacao_f = datetime.strptime(transacao['data'], "%Y/%m/%d")
+            transacao_f = datetime.strptime(transacao['data'], "%Y/%m/%d %H:%M:%S").date()
             if transacao_f == data_hoje:
                 transacoes_dia.append(transacao)
         return transacoes_dia
@@ -272,7 +266,7 @@ class Historico:
 def gerar_cliente():
         while True:
             cpf_cliente = input("\nDigite o seu cpf(apenas números): ").strip()
-            if not cpf_cliente.isdecimal() or not cpf_cliente or len(cpf_cliente) > 11:
+            if not cpf_cliente.isdecimal() or not cpf_cliente or len(cpf_cliente) > 11 or len(cpf_cliente) < 11:
                 print("\nDigite um cpf válido")
                 continue
             break 
@@ -300,6 +294,32 @@ def gerar_cliente():
         endereco = f"{endereco_local} {endereco_numero}"
         return Cliente(nome=nome, cpf=cpf_cliente, endereco=endereco)
 
+def escolha(banco):
+        while True:
+            cpf = input("\nDigite o seu cpf(apenas números): ").strip()
+            if not cpf.isdecimal() or not cpf or len(cpf) > 11 or len(cpf) < 11:
+                print("\nDigite um cpf válido")
+                continue
+            break
+        conta_cliente = None
+        for conta in banco.lista_contas:
+            if cpf == conta.cliente.cpf:
+                conta_cliente = conta
+                break
+        if not conta_cliente:
+            print("\nNenhuma conta foi encontrada para esse cpf")
+            return
+        while True:
+            escolha = input("\nDigite a opção que você quer fazer na sua conta: [transferencia] [extrato] ").strip()
+            if not escolha:
+                print("\nDigite uma opção válida")
+                continue
+            break
+        if escolha == "transferencia":
+            conta_cliente.cliente.solicitar_transacao(conta_cliente)
+        elif escolha == "extrato":
+            conta_cliente.exibir_extrato()
+                                            
 def main():
     meu_banco = Banco("Banco Central Python")
     
@@ -312,7 +332,7 @@ def main():
         print("3 - Acessar Conta (Saque, Depósito, Extrato)")
         print("4 - Listar todas as Contas")
         print("0 - Sair")
-        print("=" * 40)
+        print("<" + ("=" * 40) + ">")
         
         opcao = input("Escolha uma opção: ").strip()
 
@@ -322,7 +342,7 @@ def main():
             case "2":
                 meu_banco.abrir_conta()
             case "3":
-                meu_banco.solicitacao()
+                escolha(meu_banco)
             case "4":
                 meu_banco.listar_contas()
             case "0":
