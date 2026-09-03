@@ -10,7 +10,7 @@ ROOT_PATH = Path(__file__).parent
 #os.mkdir(ROOT_PATH / "meu-diretorio")
 
 #NOTE: criando o arquivo dentro da pasta que estamos 
-arquivo = open(ROOT_PATH / "novo.txt", 'w')
+arquivo = open(ROOT_PATH / "novo.txt", 'w', encoding='utf-8')
 arquivo.close()
 
 #NOTE: você coloca o caminho da pasta aonde o arquivo está, o nome do arquivo, e após isso o caminho novamente do arquivo e o seu nome modificado(isso tudo com o os.rename)

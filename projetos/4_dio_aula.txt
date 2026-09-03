@@ -1,0 +1,19 @@
+Tratamento de erros com arquivos:
+*FileNotFoundError
+-Lançada quando o arquivo que está sendo aberto não pode ser encontrado no diretório especificado.
+
+*PermissionError
+-Lançada quando ocorre uma tentativa de abrir um arquivo sem as permissões adequadas para leitura ou gravação.
+
+*IOError
+-Lançada quando ocorre um erro geral de E/S (entrada e saída) ao trabalhar com o arquivo, como problemas de permissão, falta de espaço em disco, entre outros.
+
+*UnicodeDecodeError
+-Lançada quando ocorre um erro ao tentar decodificar os dados de um arquivo de texto usando uma codificação inadequada.
+
+*UnicodeEncodeError
+-Lanada quando ocorre um erro ao tentar codificar dados em uma determinada codificação ao gravar em um arquivo de texto.
+
+*IsADirectoryError
+-Lançada quando é feita uma tentativa de abrir um diretório em vez de um arquivo de texto.
+
