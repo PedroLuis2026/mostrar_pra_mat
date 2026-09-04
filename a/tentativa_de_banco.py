@@ -2,6 +2,7 @@ from random import randint
 from datetime import *
 from abc import *
 
+
 class Banco:
     def __init__(self, nome_banco:str):
         self.nome_banco = nome_banco
@@ -319,6 +320,7 @@ def escolha(banco):
             conta_cliente.cliente.solicitar_transacao(conta_cliente)
         elif escolha == "extrato":
             conta_cliente.exibir_extrato()
+
                                             
 def main():
     meu_banco = Banco("Banco Central Python")
@@ -346,6 +348,7 @@ def main():
             case "4":
                 meu_banco.listar_contas()
             case "0":
+
                 print("\nSaindo do sistema bancário. Obrigrado por usar o nosso banco!")
                 break
             case _:
