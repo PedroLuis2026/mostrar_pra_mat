@@ -3,10 +3,14 @@ from pathlib import Path
 
 ROOT_PATH = Path(__file__).parent
 
+# NOTE:todo daod passado para um db, deve ser passado em uma tupla ou uma lista para rodar
+
 # NOTE:Comando para criar um arquivo sqlite(o banco de dados) dentro dos arquivos python
 conexao = sqlite3.connect(ROOT_PATH / "meu_banco.db")
 # NOTE:Comando para ativar o nosso "poder de edição" no nosso banco de dados
 cursor = conexao.cursor()
+# NOTE:Esse comando, faz com que a linha que você passou, seja filtrada para um objeto da API integrada do python, transformando toda a tupla em um dicionario, facilitando na exibição dos dados, exibição mais limpa do código, e fazendo com que o acesso a esses dados seja facilidado(transforma as colunas para que aquele dado pertence em chaves, e os dados em valores)
+cursor.row_factory = sqlite3.Row
 
 
 def criar_tabela(conexao, cursor):
@@ -40,14 +44,28 @@ def deletar(conexao, cursor, id):
 
 
 def inserir_muitos(conexao, cursor, dados):
+    # NOTE:O comando em sql para executar varios comandos de uma vez, é apenas você usar o comando executemany com o cursor
     cursor.executemany("INSERT INTO clientes (nome, email) VALUES (?,?)", dados)
     conexao.commit()
 
 
-dados = [
-    ("Pedro", "aluga@gmail.com"),
-    ("Gueguel", "miguezu@gmail.com"),
-    ("Gbr", "bgas@gmail.com"),
-]
+def exibir_dado(cursor, dados):
+    # NOTE:o metodo fetchone, pega uma linha especifica da tabela para exibila no terminal, e sempre retorna uma tupla com os dados que você definiu no comando sql, podendo ser todos ou dados mais espécificos(como apenas uma coluna ou n colunas)
+    cursor.execute("SELECT * FROM clientes WHERE id = ?;", (dados,))
+    return cursor.fetchone()
 
-inserir_muitos(conexao, cursor, dados)
+
+def exibir_dados(cursor):
+    # NOTE:faz a mesma coisa que o fetchone, mas diferente de retornar apenas uma linha, ele retorna uma lista q dentro dela, possui tuplas de cada linha da sua tabela que você determinou
+    cursor.execute("SELECT * FROM clientes")
+    print(cursor.fetchall())
+    return cursor.fetchall()
+
+
+cliente = exibir_dado(cursor, 2)
+# NOTE:Quando você usar o comando row_factory no cursor, sempre exiba os dados recolhidos em formato de dicionario, para não retornar que o objeto cliente é uma instância de Row
+print(dict(cliente))
+
+# NOTE:Para proteger os seus dados, nunca instâncie como string um local de comando sql, sempre passe por fora do comando a tupla com os valores que você quer modificar, deletar ou fazer algo do tipo
+
+
